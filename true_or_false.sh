@@ -1,15 +1,31 @@
 #!/user/bin/env bash
 
-credentials_filename=ID_card.txt
+print_menu() {
+    echo '0. Exit'
+    echo '1. Play a game'
+    echo '2. Display scores'
+    echo '3. Reset scores'
+}
 
 echo 'Welcome to the True or False Game!'
-curl --silent --output "$credentials_filename" http://127.0.0.1:8000/download/file.txt
 
-username=$(cut -d '"' -f 4 "$credentials_filename")
-password=$(cut -d '"' -f 8 "$credentials_filename")
-cookie_filename=cookie.txt
-curl --silent --output "$cookie_filename" --cookie-jar 'login-cookie' --user "$username":"$password" http://127.0.0.1:8000/login
-printf 'Login message: %s\n' "$(cat "$cookie_filename")"
-
-response=$(curl --cookie 'login-cookie' http://127.0.0.1:8000/game)
-printf "Response: %s" "$response"
+while true; do
+    print_menu
+    echo 'Enter an option:'
+    read -r option
+    
+    case "$option" in
+        "0")
+            echo 'See you later!'
+            break;;
+        "1")
+            echo 'Playing game';;
+        "2")
+            echo 'Displaying scores';;
+        "3")
+            echo 'Resetting scores';;
+        *)
+            echo 'Invalid option!';;
+    esac
+    echo -e "\n"
+done
