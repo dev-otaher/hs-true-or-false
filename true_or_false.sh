@@ -7,6 +7,7 @@ game_endpoint=http://127.0.0.1:8000/game
 credentials_filename=ID_card.txt
 cookie_filename=cookie.txt
 login_cookie_name=login-cookie
+scores_filename=scores.txt
 
 print_menu() {
     echo '0. Exit'
@@ -34,6 +35,11 @@ get_question_and_answer() {
     curl -b "$login_cookie_name" "$game_endpoint"
 }
 
+save_scores() {
+    date=$(date +%Y-%m-%d)
+    printf "User: %s, Score: %s, Date: %s\n" "$1" "$2" "$date" >> "$scores_filename"
+}
+
 play_game() {
     echo 'What is your name?'
     read -r name
@@ -57,9 +63,45 @@ play_game() {
             echo 'Wrong answer, sorry!'
             printf "%s you have %s correct answer(s).\n" "$name" "$correct_answers"
             printf "Your score is %s points." "$points"
+            save_scores "$name" "$points"
             break
         fi
     done
+}
+
+is_file_exists() {
+    if [ -f "$1" ]; then
+        echo 1
+    else
+        echo 0
+    fi
+}
+
+is_score_file_exists() {
+    if [ "$(is_file_exists "$scores_filename")" -eq 1 ]; then
+        echo 1
+    else
+        echo 0
+    fi
+}
+
+display_scores() {
+    if [ "$(is_score_file_exists)" -eq 1 ]; then
+        echo 'Player scores'
+        cat "$scores_filename"
+    else
+        echo 'File not found or no scores in it!'
+    fi
+}
+
+
+reset_scores() {
+    if [ "$(is_score_file_exists)" -eq 1 ]; then
+        rm "$scores_filename"
+        echo 'File deleted successfully!'
+    else
+        echo 'File not found or no scores in it!'
+    fi
 }
 
 echo 'Welcome to the True or False Game!'
@@ -75,9 +117,9 @@ while true; do
         "1")
             play_game;;
         "2")
-            echo 'Displaying scores';;
+            display_scores;;
         "3")
-            echo 'Resetting scores';;
+            reset_scores;;
         *)
             echo 'Invalid option!';;
     esac
